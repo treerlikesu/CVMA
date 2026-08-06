@@ -1,4 +1,4 @@
-R code for CVMA-MD
+## R code for CVMA-MD
 
 library(mlogit)
 library(dplyr)
