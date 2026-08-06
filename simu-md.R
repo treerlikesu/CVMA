@@ -1,3 +1,5 @@
+R code for CVMA-MD
+
 library(mlogit)
 library(dplyr)
 library(tidyr)
