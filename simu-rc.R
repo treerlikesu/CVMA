@@ -1,3 +1,5 @@
+## R code for CVMA-RC
+
 required_packages <- c(
   "mlogit", "dplyr", "quadprog", "MASS", "evd", "lmtest",
   "xgboost", "nnet", "ggplot2", "reshape2"
@@ -734,8 +736,6 @@ for (ni in sample_indices) {
     
     successful_replications[ni, sig] <- successful
     mspe_by_rep[ni, sig, , ] <- scenario_mspe
-    accuracy_by_rep[ni, sig, , ] <- scenario_accuracy
-    log_score_by_rep[ni, sig, , ] <- scenario_log_score
     weights_by_rep[ni, sig, , ] <- scenario_weights
     cv_selected_by_rep[ni, sig, , ] <- scenario_cv_selected
     mt_selected_by_rep[ni, sig, , ] <- scenario_mt_selected
@@ -743,8 +743,6 @@ for (ni in sample_indices) {
 }
 
 mean_mspe <- apply(mspe_by_rep, c(1, 2, 4), mean, na.rm = TRUE)
-mean_accuracy <- apply(accuracy_by_rep, c(1, 2, 4), mean, na.rm = TRUE)
-mean_log_score <- apply(log_score_by_rep, c(1, 2, 4), mean, na.rm = TRUE)
 mean_weights <- apply(weights_by_rep, c(1, 2, 4), mean, na.rm = TRUE)
 cv_selection_rate <- apply(cv_selected_by_rep, c(1, 2, 4), mean, na.rm = TRUE)
 mt_selection_rate <- apply(mt_selected_by_rep, c(1, 2, 4), mean, na.rm = TRUE)
@@ -846,57 +844,8 @@ mspe_plot <- ggplot2::ggplot(
 
 print(mspe_plot)
 ggplot2::ggsave(
-  file.path(figure_dir, "scenario1_mspe_with_xgboost_nn.pdf"),
+  file.path(figure_dir, "scenario1_mspe.pdf"),
   mspe_plot,
-  width = 42,
-  height = 25,
-  units = "cm"
-)
-
-accuracy_data <- reshape2::melt(
-  accuracy_by_rep,
-  varnames = c("SampleSize", "Scenario", "Replication", "Method"),
-  value.name = "Accuracy"
-) %>%
-  dplyr::filter(is.finite(Accuracy)) %>%
-  dplyr::mutate(
-    SampleSize = factor(
-      SampleSize,
-      levels = as.character(n_set),
-      labels = paste0("n = ", n_set)
-    ),
-    Scenario = factor(Scenario, levels = scenario_names),
-    Method = factor(Method, levels = method_names)
-  )
-
-accuracy_plot <- ggplot2::ggplot(
-  accuracy_data,
-  ggplot2::aes(x = Method, y = Accuracy, color = Method, fill = Method)
-) +
-  ggplot2::geom_boxplot(
-    width = 0.8,
-    alpha = 0.25,
-    linewidth = 0.45,
-    outlier.size = 0.25
-  ) +
-  ggplot2::facet_grid(SampleSize ~ Scenario) +
-  ggplot2::scale_color_manual(values = method_colors, drop = FALSE) +
-  ggplot2::scale_fill_manual(values = method_colors, drop = FALSE) +
-  ggplot2::scale_y_continuous(limits = c(0, 1)) +
-  ggplot2::labs(x = NULL, y = "Prediction accuracy") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid = ggplot2::element_blank(),
-    legend.position = "none",
-    axis.text.x = ggplot2::element_text(angle = 55, hjust = 1, size = 6),
-    axis.text.y = ggplot2::element_text(size = 7),
-    strip.text = ggplot2::element_text(size = 8)
-  )
-
-print(accuracy_plot)
-ggplot2::ggsave(
-  file.path(figure_dir, "scenario1_accuracy_with_xgboost_nn.pdf"),
-  accuracy_plot,
   width = 42,
   height = 25,
   units = "cm"
@@ -942,7 +891,7 @@ weight_plot <- ggplot2::ggplot(
 
 print(weight_plot)
 ggplot2::ggsave(
-  file.path(figure_dir, "scenario1_weights_with_xgboost_nn.pdf"),
+  file.path(figure_dir, "scenario1_weights.pdf"),
   weight_plot,
   width = 38,
   height = 25,
